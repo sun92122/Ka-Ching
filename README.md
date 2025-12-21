@@ -8,6 +8,10 @@
 ![Docker](https://img.shields.io/badge/Container-Podman%2FDocker-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+<!-- Link to other language versions -->
+[中文 (繁體)](./docs/README.zh-TW.md)\
+[English](./README.md)
+
 ## 📖 Introduction
 
 **Ka-Ching** is not your typical, boring enterprise ERP. It is built for the real world—the lemonade stands, the local coffee shops, the university clubs, and the family treasurers.
