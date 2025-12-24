@@ -1,33 +1,33 @@
 version: '3.8'
 
 volumes:
-  # 共享設定區 (用於後端控制基礎設施)
-  app_config: # 交換 Tunnel Token
+  app_config:
   nginx_config:
-    # 交換 Nginx default.conf
+  db_data:
+
 
 services:
   # 1. 資料庫
   db:
-    image: postgres:15-alpine
+    image: docker.io/library/postgres:15-alpine
     restart: always
     volumes:
-      - ./pgdata:/var/lib/postgresql/data:Z
+      - db_data:/var/lib/postgresql/data:Z
     environment:
       POSTGRES_DB: accounting
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
-  # 2. 後端 (Django) - 控制中心
+  # 2. 後端 (Django)
   backend:
     build: ./backend
     restart: always
     volumes:
       - ./backend:/app:Z
       - ./backend/media:/app/media:Z
-      - /app/.venv # 避免本地 venv 覆蓋容器
-      - app_config:/app/config:Z # [寫入] Tunnel Token
-      - nginx_config:/app/nginx_shared:Z # [寫入] Nginx Config
+      - /app/.venv
+      - app_config:/app/config:Z
+      - nginx_config:/app/nginx_shared:Z
     environment:
       DB_HOST: db
       DB_PASSWORD: ${DB_PASSWORD}
@@ -35,27 +35,26 @@ services:
     depends_on:
       - db
 
-  # 3. Nginx (入口閘道) - 具備熱重載
+  # 3. Nginx
   nginx:
-    image: nginx:alpine
+    image: docker.io/library/nginx:alpine
     restart: always
-    entrypoint: [ "/bin/sh", "/etc/nginx/entrypoint.sh" ] # 使用看門狗
+    entrypoint: [ "/bin/sh", "/etc/nginx/entrypoint.sh" ]
     ports:
-      - "80:80" # 只需開放標準 Port，網域過濾由設定檔控制
-      - "8080:8080" # 內網備用
+      - "8080:80"
     volumes:
       - ./frontend/dist:/usr/share/nginx/html:ro
       - ./backend/media:/usr/share/nginx/html/media:ro
-      - nginx_config:/etc/nginx/conf.d:Z # [讀取] Config
+      - nginx_config:/etc/nginx/conf.d:Z
       - ./nginx/entrypoint.sh:/etc/nginx/entrypoint.sh:ro
     depends_on:
       - backend
 
-  # 4. Cloudflare Tunnel - 具備熱啟動
+  # 4. Cloudflare Tunnel
   tunnel:
-    image: cloudflare/cloudflared:latest
+    image: docker.io/cloudflare/cloudflared:latest
     restart: always
-    entrypoint: [ "/bin/sh", "/etc/cloudflared/entrypoint.sh" ] # 使用看門狗
+    entrypoint: [ "/bin/sh", "/etc/cloudflared/entrypoint.sh" ]
     volumes:
-      - app_config:/etc/cloudflared/config:Z # [讀取] Token
+      - app_config:/etc/cloudflared/config:Z
       - ./tunnel/entrypoint.sh:/etc/cloudflared/entrypoint.sh:ro
