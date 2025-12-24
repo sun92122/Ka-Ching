@@ -1,0 +1,51 @@
+# --- Stage 1: Builder (使用 uv 安裝依賴) ---
+# 使用官方 uv 映像檔，基礎為 Python 3.12-slim
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+
+WORKDIR /app
+
+# 啟用編譯字節碼與複製模式 (優化效能)
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+
+# 1. 複製依賴定義檔
+# 我們先複製這兩個檔案，這樣如果程式碼變更但依賴沒變，Docker 可以使用快取，不用重新安裝套件
+COPY pyproject.toml uv.lock ./
+
+# 2. 安裝依賴 (不包含專案程式碼，只裝 Library)
+# --frozen: 嚴格依照 uv.lock 版本安裝
+# --no-dev: 不安裝開發用套件
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+# --- Stage 2: Runtime (執行環境) ---
+FROM docker.io/library/python:3.12-slim-bookworm
+
+WORKDIR /app
+
+# 安裝必要的系統依賴
+# fonts-noto-cjk: 解決 PDF 匯出時的中文字型問題 (WeasyPrint)
+# libpq-dev: PostgreSQL 資料庫連線依賴
+# libpango*, libharfbuzz*: WeasyPrint 的繪圖依賴
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    fonts-noto-cjk \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libharfbuzz-subset0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 從 Builder 階段複製已建立好的虛擬環境
+COPY --from=builder /app/.venv /app/.venv
+
+# 將虛擬環境加入 PATH，這樣後續指令可以直接使用 python/pip/gunicorn
+ENV PATH="/app/.venv/bin:$PATH"
+
+# 複製專案程式碼 (backend 資料夾內的所有檔案)
+COPY . .
+
+# 設定啟動腳本權限 (確保 entrypoint.sh 可執行)
+RUN chmod +x /app/entrypoint.sh
+
+# 設定容器啟動時的入口指令
+CMD ["/app/entrypoint.sh"]

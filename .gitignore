@@ -2,18 +2,26 @@
 __pycache__/
 *.py[cod]
 .venv/
-backend/media/   # 使用者上傳的檔案不進版控
-backend/static/  # collectstatic 產生的檔案
+backend/media/
+backend/static/
+
+backend/nginx_shared/
+backend/config/
 
 # Node / Vue
 node_modules/
-frontend/dist/   # build 出來的靜態檔
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Environment Variables (資安關鍵)
 .env
+.env.*
+!.env.example
 
 # Database Data (資料不進版控)
-pgdata/
+db_data/
 
 # IDE Settings
 .vscode/
