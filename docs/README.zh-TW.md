@@ -121,6 +121,6 @@
 
 ## 📄 授權條款
 
-本專案採用 MIT 授權條款發布。詳情請參閱 LICENSE 文件。
+本專案採用 Apache 2.0 授權條款發布。詳情請參閱 LICENSE 文件。
 
 <p align="center">Made with ❤️ 獻給各地的小型商家與夢想家。</p>

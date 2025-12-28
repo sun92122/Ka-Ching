@@ -120,6 +120,6 @@ Got a great idea? Found a bug? We'd love your help to make Ka-Ching even louder!
 
 ## 📄 License
 
-Distributed under the MIT License. See LICENSE for more information.
+Distributed under the Apache 2.0 License. See LICENSE for more information.
 
 <p align="center">Made with ❤️ for small businesses and dreamers everywhere.</p>
