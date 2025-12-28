@@ -6,7 +6,7 @@
 ![Django](https://img.shields.io/badge/Django-Ninja-092E20?logo=django)
 ![Vue](https://img.shields.io/badge/Vue.js-3.0-4FC08D?logo=vue.js)
 ![Docker](https://img.shields.io/badge/Container-Podman%2FDocker-2496ED?logo=docker)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![License](https://img.shields.io/badge/License-Apache%202.0-yellow)
 
 <!-- Link to other language versions -->
 [中文 (繁體)](./README.zh-TW.md)\
